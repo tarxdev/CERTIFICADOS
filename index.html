@@ -1,238 +1,361 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificados e Projetos - Tarciso Ferreira</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #EAEAEA;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-<meta charset="UTF-8">
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            transition: opacity 0.5s ease; /* Adicionado para uma transição suave */
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Certificados - Tarciso Ferreira</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-
-<style>
-
-body {
-
-font-family: 'Inter', sans-serif;
-
-background-color: #000000;
-
-color: #EAEAEA;
-
-overflow-x: hidden;
-
-}
-
-#bg-canvas {
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-height: 100%;
-
-z-index: 0;
-
-}
-
-.content-wrapper {
-
-position: relative;
-
-z-index: 1;
-
-}
-
-.certificate-card {
-
-background-color: rgba(255, 255, 255, 0.05);
-
-backdrop-filter: blur(10px);
-
-border: 1px solid rgba(255, 255, 255, 0.1);
-
-transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-overflow: hidden;
-
-}
-
-.certificate-card:hover {
-
-transform: translateY(-10px) scale(1.03);
-
-box-shadow: 0 15px 35px rgba(138, 43, 226, 0.25);
-
-}
-
-.certificate-card img {
-
-transition: transform 0.4s ease;
-
-}
-
-.certificate-card:hover img {
-
-transform: scale(1.05);
-
-}
-
-.filter-btn {
-
-transition: all 0.3s ease;
-
-}
-
-.filter-btn.active {
-
-background-color: #d946ef;
-
-color: #ffffff;
-
-box-shadow: 0 0 15px rgba(217, 70, 239, 0.5);
-
-}
-
-</style>
-
-</head>
-
-<body class="bg-black">
-
-angelscript
-Copiar
-<canvas id="bg-canvas"></canvas>
-
-<div class="content-wrapper p-4 sm:p-8">
-    <header class="max-w-7xl mx-auto flex justify-between items-center mb-12 sm:mb-16">
-        <h1 class="text-4xl sm:text-5xl font-bold tracking-tighter">Meus Certificados</h1>
-        <a href="index.html" class="bg-white text-black px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold hover:bg-fuchsia-500 transition-colors">
-            &larr; Voltar ao Portfólio
-        </a>
-    </header>
-
-    <main class="max-w-7xl mx-auto">
+        /* --- MODIFICAÇÃO APLICADA AQUI --- */
+        /* Oculta o canvas de fundo quando o body tem a classe 'project-details-active' */
+        body.project-details-active #bg-canvas {
+            opacity: 0;
+            pointer-events: none; /* Impede interações com o canvas oculto */
+        }
         
-        <div id="certificate-filters" class="flex flex-wrap justify-center gap-2 mb-10">
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Estilos para os cards da página principal */
+        .certificate-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.25);
+        }
+
+        .certificate-card img {
+            transition: transform 0.4s ease;
+        }
+
+        .certificate-card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Estilos para os cards da página de detalhes */
+        .card-base {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        /* Aplica o efeito de neon roxo APENAS nos cards da página de projetos */
+        #page-project-details .card-base {
+            border-color: rgba(138, 43, 226, 0.4); /* Cor da borda neon */
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2); /* Brilho neon */
+        }
+        
+        #page-project-details .card-base:hover {
+            transform: translateY(-8px);
+            border-color: rgba(138, 43, 226, 0.6);
+            box-shadow: 0 0 35px rgba(138, 43, 226, 0.35);
+        }
+        
+        .tech-tag {
+            background-color: rgba(138, 43, 226, 0.2);
+            color: #d946ef;
+            font-weight: bold;
+        }
+
+        /* Estilos para os filtros */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background-color: #d946ef;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-black">
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="content-wrapper p-4 sm:p-8">
+        <header class="max-w-7xl mx-auto flex justify-between items-center mb-12 sm:mb-16">
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tighter">Meus Certificados</h1>
+            <!-- Este botão agora volta para a lista principal usando JS -->
+            <a href="#" data-page-target="all-certificates" class="page-nav-btn bg-white text-black px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold hover:bg-fuchsia-500 transition-colors">
+                &larr; Voltar
+            </a>
+        </header>
+
+        <main class="max-w-7xl mx-auto">
+
+            <!-- PÁGINA 1: LISTA DE TODOS OS CERTIFICADOS -->
+            <div id="page-all-certificates" class="page-content">
+                <div id="certificate-filters" class="flex flex-wrap justify-center gap-2 mb-10">
+                </div>
+                <div id="all-certificates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
             </div>
 
-        <div id="all-certificates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- PÁGINA 2: DETALHES DO PROJETO .NET (COMEÇA ESCONDIDA) -->
+            <div id="page-project-details" class="page-content hidden">
+                 <section id="certificado" class="mb-20">
+                    <h2 class="text-3xl font-bold mb-8 text-center sm:text-left">Certificado em Destaque</h2>
+                    <div class="card-base rounded-lg p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8">
+                        <div class="md:w-1/3 w-full">
+                             <img src="https://i.ibb.co/gb70xyVm/Captura-de-tela-18-7-2025-234143.jpg" alt="Certificado de Conclusão da Trilha .NET" class="rounded-md shadow-lg w-full">
+                        </div>
+                        <div class="md:w-2/3 w-full text-center md:text-left">
+                            <h3 class="text-2xl sm:text-3xl font-bold text-fuchsia-400">Formação .NET Developer</h3>
+                            <p class="text-lg text-gray-300 mt-2">Digital Innovation One (DIO)</p>
+                            <p class="mt-4 text-gray-400">
+                                Formação completa cobrindo os fundamentos da linguagem C#, Programação Orientada a Objetos, SQL, ASP.NET Core para criação de APIs e muito mais.
+                            </p>
+                            <a href="#" target="_blank" class="inline-block mt-6 bg-fuchsia-500 text-white px-6 py-3 rounded-md font-bold hover:bg-fuchsia-600 transition-colors">
+                                Ver Credencial
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="projetos">
+                    <h2 class="text-3xl font-bold mb-8 text-center sm:text-left">Projetos desenvolvidos no curso</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        
+                        <!-- PROJETOS ADICIONADOS AQUI -->
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="preview-estacionamento.mp4" class="w-full h-48 object-cover" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/111111/FFFFFF?text=Preview"></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Sistema de Estacionamento</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Sistema de console em C# para gerenciar a entrada, saída e cobrança de veículos em um pátio.</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">C#</span><span class="tech-tag text-xs px-2 py-1 rounded-full">.NET</span></div>
+                                <a href="https://github.com/tarxdev/sistema-estacionamento-csharp.git" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+                        
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="assets/demo-hotel.mp4" poster="https://placehold.co/1920x1080/111111/FFFFFF?text=Hotel" class="w-full h-48 object-cover" autoplay loop muted playsinline></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Sistema de Hospedagem</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Modelo de classes em C# para um sistema de hotel, com lógica para cálculo de diárias e descontos.</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">C#</span><span class="tech-tag text-xs px-2 py-1 rounded-full">POO</span></div>
+                                <a href="#" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="assets/demo-celular.mp4" poster="https://placehold.co/1920x1080/111111/FFFFFF?text=Celular" class="w-full h-48 object-cover" autoplay loop muted playsinline></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Modelagem de Celular (POO)</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Demonstração de POO (Herança, Polimorfismo) para modelar diferentes marcas de celulares em C#.</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">C#</span><span class="tech-tag text-xs px-2 py-1 rounded-full">POO Avançado</span></div>
+                                <a href="#" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="assets/demo-docker.mp4" poster="https://placehold.co/1920x1080/111111/FFFFFF?text=Docker" class="w-full h-48 object-cover" autoplay loop muted playsinline></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Site com Docker e Apache</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Uso de Docker Compose para servir um site estático com um container do servidor Apache (httpd).</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">Docker</span><span class="tech-tag text-xs px-2 py-1 rounded-full">DevOps</span></div>
+                                <a href="#" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="assets/demo-sql.mp4" poster="https://placehold.co/1920x1080/111111/FFFFFF?text=SQL" class="w-full h-48 object-cover" autoplay loop muted playsinline></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Desafio SQL com Node.js</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Script Node.js que cria, popula e executa consultas analíticas em um banco de dados SQLite.</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">Node.js</span><span class="tech-tag text-xs px-2 py-1 rounded-full">SQL</span><span class="tech-tag text-xs px-2 py-1 rounded-full">SQLite</span></div>
+                                <a href="#" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+
+                        <div class="card-base rounded-lg overflow-hidden flex flex-col project-card">
+                            <video src="assets/demo-qa.mp4" poster="https://placehold.co/1920x1080/111111/FFFFFF?text=QA" class="w-full h-48 object-cover" autoplay loop muted playsinline></video>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold">Desafio de Testes Manuais (QA)</h3>
+                                <p class="text-gray-400 mt-2 flex-grow">Documentação de um ciclo de testes, incluindo plano, casos de teste e simulação de ticket Jira.</p>
+                                <div class="mt-4 flex flex-wrap gap-2"><span class="tech-tag text-xs px-2 py-1 rounded-full">QA</span><span class="tech-tag text-xs px-2 py-1 rounded-full">Jira</span></div>
+                                <a href="#" target="_blank" class="mt-6 font-bold text-fuchsia-400 group">Ver no GitHub <span class="inline-block transition-transform group-hover:translate-x-2">→</span></a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </section>
             </div>
-    </main>
 
-    <footer class="text-center mt-20 py-8 border-t border-gray-800">
-        <p class="text-gray-500">&copy; 2025 Tarciso Ferreira. Todos os direitos reservados.</p>
-    </footer>
-</div>
+        </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script type="importmap">
-    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
-</script>
-<script type="module">
-    import * as THREE from 'three';
+        <footer class="text-center mt-20 py-8 border-t border-gray-800">
+            <p class="text-gray-500">&copy; 2025 Tarciso Ferreira. Todos os direitos reservados.</p>
+        </footer>
+    </div>
 
-    // --- SHADER DE FUNDO (o mesmo do seu portfólio) ---
-    const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
-    const fragmentShader = `varying vec2 vUv; uniform float u_time; uniform vec2 u_mouse; uniform float u_aspect; float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123); } float noise(vec2 st) { vec2 i = floor(st); vec2 f = fract(st); float a = random(i); float b = random(i + vec2(1.0, 0.0)); float c = random(i + vec2(0.0, 1.0)); float d = random(i + vec2(1.0, 1.0)); vec2 u = f * f * (3.0 - 2.0 * f); return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.y * u.x; } float fbm(vec2 st) { float value = 0.0; float amplitude = 0.5; for (int i = 0; i < 6; i++) { value += amplitude * noise(st); st *= 2.0; amplitude *= 0.5; } return value; } void main() { vec2 uv = vUv; uv.x *= u_aspect; float mouse_dist = distance(uv, u_mouse * vec2(u_aspect, 1.0)); vec2 mouse_effect = (u_mouse * vec2(u_aspect, 1.0) - uv) * (0.2 / mouse_dist); uv += mouse_effect * 0.2; vec2 p = uv * 3.0 - vec2(2.0); p.x += u_time * 0.1; float smoke_pattern = fbm(p); vec3 color1 = vec3(0.0, 0.0, 0.0); vec3 color2 = vec3(0.898, 0.0, 0.643); vec3 color3 = vec3(0.0, 0.965, 1.0); vec3 final_color = mix(color1, color2, smoothstep(0.3, 0.6, smoke_pattern)); final_color = mix(final_color, color3, smoothstep(0.5, 0.8, smoke_pattern)); final_color *= smoothstep(0.0, 0.3, smoke_pattern); final_color *= 0.6; gl_FragColor = vec4(final_color, 1.0); }`;
-    const bgCanvas = document.querySelector('#bg-canvas');
-    const bgScene = new THREE.Scene();
-    const bgCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas });
-    bgRenderer.setSize(window.innerWidth, window.innerHeight);
-    const bgMouse = new THREE.Vector2(0.5, 0.5);
-    const bgSmoothedMouse = new THREE.Vector2(0.5, 0.5);
-    const bgPlaneGeo = new THREE.PlaneGeometry(2, 2);
-    const bgMaterial = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: { u_time: { value: 0.0 }, u_mouse: { value: bgSmoothedMouse }, u_aspect: { value: window.innerWidth / window.innerHeight } } });
-    const bgPlane = new THREE.Mesh(bgPlaneGeo, bgMaterial);
-    bgScene.add(bgPlane);
-    const bgClock = new THREE.Clock();
-    function animateBg() { requestAnimationFrame(animateBg); const lerpFactor = 0.08; bgSmoothedMouse.x += (bgMouse.x - bgSmoothedMouse.x) * lerpFactor; bgSmoothedMouse.y += (bgMouse.y - bgSmoothedMouse.y) * lerpFactor; bgMaterial.uniforms.u_time.value = bgClock.getElapsedTime(); bgMaterial.uniforms.u_mouse.value.copy(bgSmoothedMouse); bgRenderer.render(bgScene, bgCamera); }
-    animateBg();
-    window.addEventListener('mousemove', (e) => { bgMouse.x = e.clientX / window.innerWidth; bgMouse.y = 1.0 - (e.clientY / window.innerHeight); });
-    window.addEventListener('resize', () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        bgRenderer.setSize(width, height);
-        bgMaterial.uniforms.u_aspect.value = width / height;
-    });
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
 
-    document.addEventListener('DOMContentLoaded', () => {
+        // --- SHADER DE FUNDO (Permanece o mesmo) ---
+        const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+        const fragmentShader = `varying vec2 vUv; uniform float u_time; uniform vec2 u_mouse; uniform float u_aspect; float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123); } float noise(vec2 st) { vec2 i = floor(st); vec2 f = fract(st); float a = random(i); float b = random(i + vec2(1.0, 0.0)); float c = random(i + vec2(0.0, 1.0)); float d = random(i + vec2(1.0, 1.0)); vec2 u = f * f * (3.0 - 2.0 * f); return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.y * u.x; } float fbm(vec2 st) { float value = 0.0; float amplitude = 0.5; for (int i = 0; i < 6; i++) { value += amplitude * noise(st); st *= 2.0; amplitude *= 0.5; } return value; } void main() { vec2 uv = vUv; uv.x *= u_aspect; float mouse_dist = distance(uv, u_mouse * vec2(u_aspect, 1.0)); vec2 mouse_effect = (u_mouse * vec2(u_aspect, 1.0) - uv) * (0.2 / mouse_dist); uv += mouse_effect * 0.2; vec2 p = uv * 3.0 - vec2(2.0); p.x += u_time * 0.1; float smoke_pattern = fbm(p); vec3 color1 = vec3(0.0, 0.0, 0.0); vec3 color2 = vec3(0.898, 0.0, 0.643); vec3 color3 = vec3(0.0, 0.965, 1.0); vec3 final_color = mix(color1, color2, smoothstep(0.3, 0.6, smoke_pattern)); final_color = mix(final_color, color3, smoothstep(0.5, 0.8, smoke_pattern)); final_color *= smoothstep(0.0, 0.3, smoke_pattern); final_color *= 0.6; gl_FragColor = vec4(final_color, 1.0); }`;
+        const bgCanvas = document.querySelector('#bg-canvas');
+        const bgScene = new THREE.Scene();
+        const bgCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas });
+        bgRenderer.setSize(window.innerWidth, window.innerHeight);
+        const bgMouse = new THREE.Vector2(0.5, 0.5);
+        const bgSmoothedMouse = new THREE.Vector2(0.5, 0.5);
+        const bgPlaneGeo = new THREE.PlaneGeometry(2, 2);
+        const bgMaterial = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: { u_time: { value: 0.0 }, u_mouse: { value: bgSmoothedMouse }, u_aspect: { value: window.innerWidth / window.innerHeight } } });
+        const bgPlane = new THREE.Mesh(bgPlaneGeo, bgMaterial);
+        bgScene.add(bgPlane);
+        const bgClock = new THREE.Clock();
+        function animateBg() { requestAnimationFrame(animateBg); const lerpFactor = 0.08; bgSmoothedMouse.x += (bgMouse.x - bgSmoothedMouse.x) * lerpFactor; bgSmoothedMouse.y += (bgMouse.y - bgSmoothedMouse.y) * lerpFactor; bgMaterial.uniforms.u_time.value = bgClock.getElapsedTime(); bgMaterial.uniforms.u_mouse.value.copy(bgSmoothedMouse); bgRenderer.render(bgScene, bgCamera); }
+        animateBg();
+        window.addEventListener('mousemove', (e) => { bgMouse.x = e.clientX / window.innerWidth; bgMouse.y = 1.0 - (e.clientY / window.innerHeight); });
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            bgRenderer.setSize(width, height);
+            bgMaterial.uniforms.u_aspect.value = width / height;
+        });
 
-        // --- DADOS DOS CERTIFICADOS ---
-        // Para adicionar/remover/mudar, você só mexe nesta lista!
-        const allCertificates = [
-            { title: 'Formação .NET Developer', institution: 'Digital Innovation One (DIO)', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+.NET', link: '#', tags: ['.NET', 'C#', 'SQL', 'AWS'] },
-            { title: 'Arquiteto de Soluções AWS', institution: 'Digital Innovation One (DIO)', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+AWS', link: '#', tags: ['AWS', 'Cloud'] },
-            { title: 'JavaScript Moderno (ES6+)', institution: 'Udemy', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+JS', link: '#', tags: ['JavaScript', 'HTML'] },
-            { title: 'Docker para Desenvolvedores', institution: 'Alura', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+Docker', link: '#', tags: ['Docker', 'DevOps'] },
-            { title: 'Fundamentos de QA', institution: 'Coursera', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+QA', link: '#', tags: ['QA', 'Processos'] },
-            { title: 'SQL Avançado', institution: 'DataCamp', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+SQL', link: '#', tags: ['SQL'] }
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // --- LÓGICA DE FILTRAGEM E GERAÇÃO DE CONTEÚDO ---
-        const certificatesGrid = document.getElementById('all-certificates-grid');
-        const certificateFilters = document.getElementById('certificate-filters');
+            // --- DADOS DOS CERTIFICADOS ---
+            const allCertificates = [
+                { title: 'Formação .NET Developer', institution: 'Digital Innovation One (DIO)', image: 'https://i.ibb.co/gb70xyVm/Captura-de-tela-18-7-2025-234143.jpg', link: '#', pageTarget: 'project-details', tags: ['.NET', 'C#', 'SQL', 'AWS'] },
+                { title: 'Arquiteto de Soluções AWS', institution: 'Digital Innovation One (DIO)', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+AWS', link: '#', tags: ['AWS', 'Cloud'] },
+                { title: 'JavaScript Moderno (ES6+)', institution: 'Udemy', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+JS', link: '#', tags: ['JavaScript', 'HTML'] },
+                { title: 'Docker para Desenvolvedores', institution: 'Alura', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+Docker', link: '#', tags: ['Docker', 'DevOps'] },
+                { title: 'Fundamentos de QA', institution: 'Coursera', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+QA', link: '#', tags: ['QA', 'Processos'] },
+                { title: 'SQL Avançado', institution: 'DataCamp', image: 'https://placehold.co/1920x1080/111111/d946ef?text=Certificado+SQL', link: '#', tags: ['SQL'] }
+            ];
 
-        function generateCards(items) {
-            if (!certificatesGrid) return;
-            certificatesGrid.innerHTML = '';
-            items.forEach(item => {
-                const cardHtml = `
+            const pages = document.querySelectorAll('.page-content');
+            const headerTitle = document.querySelector('header h1');
+            const backButton = document.querySelector('.page-nav-btn');
+
+            // --- FUNÇÃO PARA TROCAR DE PÁGINA E EXECUTAR ANIMAÇÕES (MODIFICADA) ---
+            function showPage(pageId) {
+                pages.forEach(page => page.classList.add('hidden'));
+                const targetPage = document.getElementById(pageId);
+                
+                // Remove a classe do body por padrão
+                document.body.classList.remove('project-details-active');
+
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                    window.scrollTo(0, 0);
+
+                    if (pageId === 'page-project-details') {
+                        // Adiciona a classe ao body para ocultar o canvas e deixar o fundo preto
+                        document.body.classList.add('project-details-active');
+                        
+                        headerTitle.textContent = '.NET Developer';
+                        backButton.classList.remove('hidden');
+                        gsap.from("#certificado", { duration: 1, opacity: 0, y: 50, ease: 'power3.out', delay: 0.2 });
+                        gsap.from(".project-card", { duration: 0.8, opacity: 0, y: 50, ease: 'power3.out', stagger: 0.15, delay: 0.5 });
+                    } else {
+                        headerTitle.textContent = 'Meus Certificados';
+                        backButton.classList.add('hidden');
+                        gsap.fromTo("#all-certificates-grid .certificate-card", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out' });
+                    }
+                }
+            }
+
+            // --- LÓGICA DE GERAÇÃO DE CARDS ---
+            const certificatesGrid = document.getElementById('all-certificates-grid');
+            function generateCards(items) {
+                if (!certificatesGrid) return;
+                certificatesGrid.innerHTML = '';
+                items.forEach(item => {
+                    const pageTargetAttr = item.pageTarget ? `data-page-target="${item.pageTarget}"` : '';
+                    const linkTarget = item.pageTarget ? '' : 'target="_blank"';
+
+                    const cardHtml = `
                     <div class="certificate-card rounded-lg flex flex-col">
-                        <img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-auto rounded-t-lg">
                         <div class="p-6">
                             <h3 class="text-xl font-bold">${item.title}</h3>
                             <p class="text-gray-400 mt-1">${item.institution}</p>
-                            <a href="${item.link}" target="_blank" class="inline-block mt-4 text-fuchsia-400 font-bold group">
-                                Ver Credencial
+                            <a href="${item.link}" ${linkTarget} ${pageTargetAttr} class="page-nav-btn inline-block mt-4 text-fuchsia-400 font-bold group">
+                                Ver Projeto
                                 <span class="inline-block transition-transform group-hover:translate-x-2">→</span>
                             </a>
                         </div>
                     </div>`;
-                certificatesGrid.innerHTML += cardHtml;
-            });
-            // Animação de entrada para os novos cards
-            gsap.fromTo("#all-certificates-grid .certificate-card", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out' });
-        }
+                    certificatesGrid.innerHTML += cardHtml;
+                });
+            }
 
-        function setupFilters() {
-            if (!certificateFilters) return;
-            const allTags = ['Todos', ...new Set(allCertificates.flatMap(item => item.tags))];
-            certificateFilters.innerHTML = allTags.map(tag => 
-                `<button data-filter="${tag}" class="filter-btn ${tag === 'Todos' ? 'active' : ''} bg-gray-800 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold hover:bg-fuchsia-500 hover:text-white">${tag}</button>`
-            ).join('');
+            // --- LÓGICA DOS FILTROS ---
+            const certificateFilters = document.getElementById('certificate-filters');
+            function setupFilters() {
+                if (!certificateFilters) return;
+                const allTags = ['Todos', ...new Set(allCertificates.flatMap(item => item.tags))];
+                certificateFilters.innerHTML = allTags.map(tag =>
+                    `<button data-filter="${tag}" class="filter-btn ${tag === 'Todos' ? 'active' : ''} bg-gray-800 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold hover:bg-fuchsia-500 hover:text-white">${tag}</button>`
+                ).join('');
 
-            certificateFilters.addEventListener('click', e => {
-                if (e.target.classList.contains('filter-btn')) {
-                    certificateFilters.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                    e.target.classList.add('active');
-                    
-                    const filter = e.target.dataset.filter;
-                    const filteredItems = filter === 'Todos' ? allCertificates : allCertificates.filter(item => item.tags.includes(filter));
-                    generateCards(filteredItems);
+                certificateFilters.addEventListener('click', e => {
+                    if (e.target.classList.contains('filter-btn')) {
+                        certificateFilters.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        const filter = e.target.dataset.filter;
+                        const filteredItems = filter === 'Todos' ? allCertificates : allCertificates.filter(item => item.tags.includes(filter));
+                        generateCards(filteredItems);
+                        gsap.fromTo("#all-certificates-grid .certificate-card", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out' });
+                    }
+                });
+            }
+
+            // --- EVENT LISTENER CENTRAL PARA NAVEGAÇÃO ---
+            document.body.addEventListener('click', e => {
+                const navLink = e.target.closest('.page-nav-btn');
+                if (navLink && navLink.dataset.pageTarget) {
+                    e.preventDefault();
+                    const targetPageId = 'page-' + navLink.dataset.pageTarget;
+                    showPage(targetPageId);
                 }
             });
-        }
 
-        // Inicia a página
-        setupFilters();
-        generateCards(allCertificates);
-    });
-</script>
+            // --- INICIALIZAÇÃO DA PÁGINA ---
+            setupFilters();
+            generateCards(allCertificates);
+            showPage('page-all-certificates');
+        });
+    </script>
 </body>
-
 </html>
