@@ -11,20 +11,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000000;
+            background-color: #020617; /* Cor base escura para o fundo */
             color: #EAEAEA;
             overflow-x: hidden;
             scroll-behavior: smooth;
         }
 
-        #bg-canvas {
+        #aurora-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 0;
-            cursor: pointer;
+            filter: blur(100px);
+            opacity: 0.6;
         }
         
         .content-wrapper {
@@ -32,18 +33,20 @@
             z-index: 1;
         }
 
-        /* Estilos para os cards da página principal */
-        .certificate-card {
-            background-color: rgba(255, 255, 255, 0.05);
+        /* Estilos unificados para os cards */
+        .card-base {
+            background: rgba(22, 28, 41, 0.3);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
-        .certificate-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.25); /* Sombra azul */
+        .card-base:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.7);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
         }
 
         .certificate-card img {
@@ -52,25 +55,6 @@
 
         .certificate-card:hover img {
             transform: scale(1.05);
-        }
-
-        /* Estilos para os cards da página de detalhes */
-        .card-base {
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        
-        #page-project-details .card-base {
-            border-color: rgba(37, 99, 235, 0.4); /* Cor da borda neon azul */
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.2); /* Brilho neon azul */
-        }
-        
-        #page-project-details .card-base:hover {
-            transform: translateY(-8px);
-            border-color: rgba(37, 99, 235, 0.6);
-            box-shadow: 0 0 35px rgba(37, 99, 235, 0.35);
         }
         
         .tech-tag {
@@ -92,12 +76,12 @@
     </style>
 </head>
 <body class="bg-black">
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="aurora-canvas"></canvas>
 
     <div class="content-wrapper p-4 sm:p-8">
         <header class="max-w-7xl mx-auto flex justify-between items-center mb-12 sm:mb-16">
             <h1 class="text-4xl sm:text-5xl font-bold tracking-tighter">Meus Certificados</h1>
-            <a href="#" data-page-target="all-certificates" class="page-nav-btn bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold hover:bg-blue-700 transition-colors hidden">
+            <a href="index.html" class="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold hover:bg-blue-700 transition-colors">
                 &larr; Voltar
             </a>
         </header>
@@ -211,121 +195,80 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script type="module">
-        // --- ANIMAÇÃO DE FUNDO "CONSTELLATION" INTERATIVA ---
-        const canvas = document.getElementById('bg-canvas');
+        // --- SCRIPT DO FUNDO AURORA SUTIL ---
+        const canvas = document.getElementById('aurora-canvas');
         const ctx = canvas.getContext('2d');
+        let blobs = [];
+        const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-        let particles = [];
-        const mouse = {
-            x: null,
-            y: null,
-            radius: 100 // Raio de interação do mouse
-        };
-
-        window.addEventListener('mousemove', event => {
-            mouse.x = event.x;
-            mouse.y = event.y;
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
         });
 
-        window.addEventListener('mouseout', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-        
-        window.addEventListener('resize', init);
-
-        class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
+        class Blob {
+            constructor(color, x, y, radius) {
+                this.originX = x;
+                this.originY = y;
                 this.x = x;
                 this.y = y;
-                this.directionX = directionX;
-                this.directionY = directionY;
-                this.size = size;
+                this.radius = radius;
                 this.color = color;
+            }
+
+            update() {
+                const springFactor = 0.04;
+                let targetX = this.originX;
+                let targetY = this.originY;
+
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const interactionRadius = 250;
+                
+                if (dist < interactionRadius) {
+                    const force = (interactionRadius - dist) / interactionRadius;
+                    const forceX = (dx / dist) * force * 25;
+                    const forceY = (dy / dist) * force * 25;
+                    targetX += forceX;
+                    targetY += forceY;
+                }
+
+                this.x += (targetX - this.x) * springFactor;
+                this.y += (targetY - this.y) * springFactor;
             }
 
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = this.color;
                 ctx.fill();
-            }
-
-            update() {
-                if (mouse.x && mouse.y) {
-                    let dx = this.x - mouse.x;
-                    let dy = this.y - mouse.y;
-                    let distance = Math.sqrt(dx*dx + dy*dy);
-                    if (distance < mouse.radius + this.size) {
-                        const forceDirectionX = dx / distance;
-                        const forceDirectionY = dy / distance;
-                        const force = (mouse.radius - distance) / mouse.radius;
-                        this.directionX += forceDirectionX * force * 0.25;
-                        this.directionY += forceDirectionY * force * 0.25;
-                    }
-                }
-
-                if (this.x + this.size > canvas.width || this.x - this.size < 0) {
-                    this.directionX = -this.directionX;
-                }
-                if (this.y + this.size > canvas.height || this.y - this.size < 0) {
-                    this.directionY = -this.directionY;
-                }
-                
-                this.x += this.directionX;
-                this.y += this.directionY;
-                
-                this.draw();
             }
         }
 
         function init() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            particles = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2.5) + 1;
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * 0.6) - 0.3;
-                let directionY = (Math.random() * 0.6) - 0.3;
-                let color = 'rgba(255, 255, 255, 0.8)';
-                particles.push(new Particle(x, y, directionX, directionY, size, color));
-            }
-        }
-
-        function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particles.length; a++) {
-                for (let b = a; b < particles.length; b++) {
-                    let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
-                                 + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
-                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                        opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = `rgba(173, 216, 230, ${opacityValue})`;
-                        ctx.lineWidth = 0.8;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[a].x, particles[a].y);
-                        ctx.lineTo(particles[b].x, particles[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
+            blobs = [
+                new Blob('rgba(59, 130, 246, 0.5)', canvas.width * 0.2, canvas.height * 0.3, 250),
+                new Blob('rgba(91, 33, 182, 0.5)', canvas.width * 0.8, canvas.height * 0.2, 300),
+                new Blob('rgba(129, 28, 152, 0.4)', canvas.width * 0.7, canvas.height * 0.8, 280),
+                new Blob('rgba(30, 64, 175, 0.4)', canvas.width * 0.3, canvas.height * 0.7, 220)
+            ];
         }
 
         function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const blob of blobs) {
+                blob.update();
+                blob.draw();
             }
-            connect();
+            requestAnimationFrame(animate);
         }
 
         init();
         animate();
+        window.addEventListener('resize', init);
         // --- FIM DO SCRIPT DE FUNDO ---
 
 
@@ -357,7 +300,7 @@
                         headerTitle.textContent = '.NET Developer';
                         backButton.classList.remove('hidden');
                         gsap.from("#certificado", { duration: 1, opacity: 0, y: 50, ease: 'power3.out', delay: 0.2 });
-                        gsap.from(".project-card", { duration: 0.8, opacity: 0, y: 50, ease: 'power3.out', stagger: 0.15, delay: 0.5 });
+                        gsap.from("#projetos .project-card", { duration: 0.8, opacity: 0, y: 50, ease: 'power3.out', stagger: 0.15, delay: 0.5 });
                     } else {
                         headerTitle.textContent = 'Meus Certificados';
                         backButton.classList.add('hidden');
@@ -375,7 +318,7 @@
                     const linkTarget = item.pageTarget ? '' : 'target="_blank"';
 
                     const cardHtml = `
-                    <div class="certificate-card rounded-lg flex flex-col">
+                    <div class="card-base certificate-card rounded-lg flex flex-col">
                         <img src="${item.image}" alt="${item.title}" class="w-full h-auto rounded-t-lg">
                         <div class="p-6">
                             <h3 class="text-xl font-bold">${item.title}</h3>
@@ -422,7 +365,14 @@
 
             setupFilters();
             generateCards(allCertificates);
-            showPage('page-all-certificates');
+            // Lógica para determinar a página inicial (se necessário)
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page');
+            if (page === 'project-details') {
+                 showPage('page-project-details');
+            } else {
+                 showPage('page-all-certificates');
+            }
         });
     </script>
 </body>
